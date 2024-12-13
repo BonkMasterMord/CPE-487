@@ -27,6 +27,7 @@ ARCHITECTURE Behavioral OF pong IS
     SIGNAL S_vsync : STD_LOGIC;
     SIGNAL S_pixel_row, S_pixel_col : STD_LOGIC_VECTOR (10 DOWNTO 0);
     SIGNAL batpos : STD_LOGIC_VECTOR (10 DOWNTO 0); -- 9 downto 0
+    SIGNAL batpos2 : STD_LOGIC_VECTOR (10 DOWNTO 0);
     SIGNAL count : STD_LOGIC_VECTOR (20 DOWNTO 0);
     SIGNAL display : std_logic_vector (15 DOWNTO 0); -- value to be displayed
     SIGNAL led_mpx : STD_LOGIC_VECTOR (2 DOWNTO 0); -- 7-seg multiplexing clock
@@ -36,6 +37,7 @@ ARCHITECTURE Behavioral OF pong IS
             pixel_row : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
             pixel_col : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
             bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0);
+            bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0);
             serve : IN STD_LOGIC;
             red : OUT STD_LOGIC;
             green : OUT STD_LOGIC;
@@ -86,6 +88,18 @@ BEGIN
             END IF;
         end if;
     END PROCESS;
+    
+    pos2 : PROCESS (clk_in) is
+    BEGIN
+        if rising_edge(clk_in) then
+            count <= count + 1;
+            IF (btnl = '1' and count = 0 and batpos2 > 0) THEN
+                batpos2 <= batpos - 10;
+            ELSIF (btnr = '1' and count = 0 and batpos2 < 800) THEN
+                batpos2 <= batpos2 + 10;
+            END IF;
+        end if;
+    END PROCESS;
     led_mpx <= count(19 DOWNTO 17); -- 7-seg multiplexing clock    
     
     add_bb : bat_n_ball
@@ -93,7 +107,8 @@ BEGIN
         v_sync => S_vsync, 
         pixel_row => S_pixel_row, 
         pixel_col => S_pixel_col, 
-        bat_y => batpos, 
+        bat_y => batpos,
+        bat_y2 => batpos2, 
         serve => btn0, 
         red => S_red, 
         green => S_green, 
