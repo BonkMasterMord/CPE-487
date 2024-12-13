@@ -10,6 +10,7 @@ ENTITY bat_n_ball IS
         pixel_row : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
         pixel_col : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
         bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0); -- current bat y position
+        bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0); -- current bat2 y position
         serve : IN STD_LOGIC; -- initiates serve
         red : OUT STD_LOGIC;
         green : OUT STD_LOGIC;
@@ -27,17 +28,19 @@ ARCHITECTURE Behavioral OF bat_n_ball IS
     signal ball_speed : STD_LOGIC_VECTOR (10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(6, 11);
     SIGNAL ball_on : STD_LOGIC; -- indicates whether ball is at current pixel position
     SIGNAL bat_on : STD_LOGIC; -- indicates whether bat at over current pixel position
+    SIGNAl bat_on2 : STD_LOGIC;
     SIGNAL game_on : STD_LOGIC := '0'; -- indicates whether ball is in playby
     -- current ball position - intitialized to center of screen
     SIGNAL ball_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(400, 11);
     SIGNAL ball_y : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
     -- bat vertical position
     CONSTANT bat_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(100, 11);
+    Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
     -- current ball motion - initialized to (+ ball_speed) pixels/frame in both X and Y directions
     SIGNAL ball_x_motion, ball_y_motion : STD_LOGIC_VECTOR(10 DOWNTO 0) := ball_speed;
     
 BEGIN
-    red <= NOT bat_on; -- color setup for red ball and cyan bat on white background
+    red <= NOT (bat_on OR bat_on2); -- color setup for red ball and cyan bat on white background
     green <= NOT ball_on;
     blue <= NOT ball_on;
 
@@ -76,6 +79,19 @@ BEGIN
                 bat_on <= '1';
         ELSE
             bat_on <= '0';
+        END IF;
+    END PROCESS;
+    
+    batdraw2 : PROCESS (bat_y2, pixel_row, pixel_col) IS
+        VARIABLE vx, vy : STD_LOGIC_VECTOR (10 DOWNTO 0); -- 9 downto 0
+    BEGIN
+        IF ((pixel_col >= bat_x2 - bat_w) OR (bat_x2 <= bat_w)) AND
+         pixel_col <= bat_x2 + bat_w AND
+             pixel_row >= bat_y2 - bat_h AND
+             pixel_row <= bat_y2 + bat_h THEN
+                bat_on2 <= '1';
+        ELSE
+            bat_on2 <= '0';
         END IF;
     END PROCESS;
     -- process to move ball once every frame (i.e., once every vsync pulse)
