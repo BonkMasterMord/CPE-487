@@ -23,7 +23,7 @@ END bat_n_ball;
 ARCHITECTURE Behavioral OF bat_n_ball IS
     CONSTANT bsize : INTEGER := 8; -- ball size in pixels
     signal bat_w : INTEGER := 3; -- bat width in pixels
-    constant bat_h : INTEGER := 30; -- bat height in pixels
+    constant bat_h : INTEGER := 60; -- bat height in pixels
     -- distance ball moves each frame
     signal ball_speed : STD_LOGIC_VECTOR (10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(6, 11);
     SIGNAL ball_on : STD_LOGIC; -- indicates whether ball is at current pixel position
@@ -96,33 +96,40 @@ BEGIN
     END PROCESS;
     -- process to move ball once every frame (i.e., once every vsync pulse)
     mball : PROCESS
-        VARIABLE temp : STD_LOGIC_VECTOR (11 DOWNTO 0);
+           VARIABLE temp : STD_LOGIC_VECTOR (11 DOWNTO 0);
     BEGIN
         WAIT UNTIL rising_edge(v_sync);
-       -- top & bottom borders
         IF serve = '1' AND game_on = '0' THEN -- test for new serve
             game_on <= '1';
             ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
         ELSIF ball_y <= bsize THEN -- bounce off top wall
-            ball_y_motion <= ball_speed + 1; -- set vspeed to (+ ball_speed) pixels
+            ball_y_motion <= ball_speed; -- set vspeed to (+ ball_speed) pixels
         ELSIF ball_y + bsize >= 600 THEN -- if ball meets bottom wall
-            ball_y_motion <= (NOT ball_speed); -- set vspeed to (- ball_speed) pixels
-            game_on <= '0'; -- and make ball disappear
+            ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
+        
         END IF;
         -- allow for bounce off left or right of screen
         IF ball_x + bsize >= 800 THEN -- bounce off right wall
             ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
+                game_on <= '0'; -- and make ball disappear
         ELSIF ball_x <= bsize THEN -- bounce off left wall
             ball_x_motion <= ball_speed; -- set hspeed to (+ ball_speed) pixels
+                game_on <= '0'; -- and make ball disappear
         END IF;
         -- allow for bounce off bat
-        IF (ball_x + bsize/2) >= (bat_y - bat_w) AND
-         (ball_x - bsize/2) <= (bat_y + bat_w) AND
+        IF (ball_x + bsize/2) >= (bat_x - bat_w) AND
+         (ball_x - bsize/2) <= (bat_x + bat_w) AND
              (ball_y + bsize/2) >= (bat_y - bat_h) AND
              (ball_y - bsize/2) <= (bat_y + bat_h) THEN
-                ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
-            
-            
+                ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels 
+                
+        END IF;
+        
+                IF (ball_x + bsize/2) >= (bat_x2 - bat_w) AND
+         (ball_x - bsize/2) <= (bat_x2 + bat_w) AND
+             (ball_y + bsize/2) >= (bat_y2 - bat_h) AND
+             (ball_y - bsize/2) <= (bat_y2 + bat_h) THEN
+                ball_x_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels 
                 
         END IF;
         -- compute next ball vertical position
