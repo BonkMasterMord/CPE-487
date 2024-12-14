@@ -36,8 +36,8 @@ ARCHITECTURE Behavioral OF pong IS
             v_sync : IN STD_LOGIC;
             pixel_row : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
             pixel_col : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
-            bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0);
-            bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0);
+            bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0):= CONV_STD_LOGIC_VECTOR(300, 11);
+            bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
             serve : IN STD_LOGIC;
             red : OUT STD_LOGIC;
             green : OUT STD_LOGIC;
@@ -81,9 +81,9 @@ BEGIN
     BEGIN
         if rising_edge(clk_in) then
             count <= count + 1;
-            IF (btnl = '1' and count = 0 and batpos > 0) THEN
+            IF (btnl = '1' and count = 0 and batpos > 70) THEN
                 batpos <= batpos - 10;
-            ELSIF (btnr = '1' and count = 0 and batpos < 800) THEN
+            ELSIF (btnr = '1' and count = 0 and batpos < 550) THEN
                 batpos <= batpos + 10;
             END IF;
         end if;
@@ -93,9 +93,9 @@ BEGIN
     BEGIN
         if rising_edge(clk_in) then
             count <= count + 1;
-            IF (btnl = '1' and count = 0 and batpos2 > 0) THEN
+            IF (btnl = '1' and count = 0 and batpos2 > 70) THEN
                 batpos2 <= batpos - 10;
-            ELSIF (btnr = '1' and count = 0 and batpos2 < 800) THEN
+            ELSIF (btnr = '1' and count = 0 and batpos2 < 550) THEN
                 batpos2 <= batpos2 + 10;
             END IF;
         end if;
