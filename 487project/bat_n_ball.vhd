@@ -14,7 +14,9 @@ ENTITY bat_n_ball IS
         serve : IN STD_LOGIC; -- initiates serve
         red : OUT STD_LOGIC;
         green : OUT STD_LOGIC;
-        blue : OUT STD_LOGIC
+        blue : OUT STD_LOGIC;
+        score1_inc : OUT STD_LOGIC;
+        score2_inc : OUT STD_LOGIC
        
      
     );
@@ -132,6 +134,24 @@ BEGIN
                 ball_x_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels 
                 
         END IF;
+        
+        -- Deal with the scoring
+        IF ball_x + bsize >= 800 THEN -- ball off right side
+            ball_x_motion <= (NOT ball_speed) + 1;
+            game_on <= '0';
+            score1_inc <= '1';
+        ELSE
+            score1_inc <= '0';
+        END IF;
+        
+        IF ball_x <= bsize THEN -- ball off left side
+            ball_x_motion <= ball_speed;
+            game_on <= '0';
+            score2_inc <= '1';
+        ELSE
+            score2_inc <= '0';
+        END IF;
+        
         -- compute next ball vertical position
         -- variable temp adds one more bit to calculation to fix unsigned underflow problems
         -- when ball_y is close to zero and ball_y_motion is negative
