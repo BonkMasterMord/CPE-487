@@ -15,7 +15,9 @@ ENTITY pong IS
         btnr : IN STD_LOGIC;
         btn0 : IN STD_LOGIC;
         SEG7_anode : OUT STD_LOGIC_VECTOR (7 DOWNTO 0); -- anodes of four 7-seg displays
-        SEG7_seg : OUT STD_LOGIC_VECTOR (6 DOWNTO 0)
+        SEG7_seg : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+        KB_row : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
+        KB_col : IN STD_LOGIC_VECTOR (3 DOWNTO 0)
     
     ); 
 END pong;
@@ -29,8 +31,17 @@ ARCHITECTURE Behavioral OF pong IS
     SIGNAL batpos : STD_LOGIC_VECTOR (10 DOWNTO 0); -- 9 downto 0
     SIGNAL batpos2 : STD_LOGIC_VECTOR (10 DOWNTO 0);
     SIGNAL count : STD_LOGIC_VECTOR (20 DOWNTO 0);
-    SIGNAL display : std_logic_vector (15 DOWNTO 0); -- value to be displayed
+    SIGNAL display : std_logic_vector (31 DOWNTO 0); -- value to be displayed
     SIGNAL led_mpx : STD_LOGIC_VECTOR (2 DOWNTO 0); -- 7-seg multiplexing clock
+    SIGNAL row_scan : STD_LOGIC_VECTOR(3 DOWNTO 0) := "1111";
+    SIGNAL col_scan : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL paddle_up, paddle_down : STD_LOGIC := '0';
+    SIGNAL scan_state : INTEGER RANGE 0 TO 3 := 0;
+    SIGNAL scan_delay : INTEGER := 0;
+    SIGNAL score1, score2 : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL S_score1_inc, S_score2_inc : std_logic;
+    SIGNAL score_data : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL prev_score1_inc, prev_score2_inc : STD_LOGIC := '0';
     COMPONENT bat_n_ball IS
         PORT (
             v_sync : IN STD_LOGIC;
@@ -41,7 +52,9 @@ ARCHITECTURE Behavioral OF pong IS
             serve : IN STD_LOGIC;
             red : OUT STD_LOGIC;
             green : OUT STD_LOGIC;
-            blue : OUT STD_LOGIC
+            blue : OUT STD_LOGIC;
+            score1_inc : OUT STD_LOGIC;
+            score2_inc : OUT STD_LOGIC
            
             
         );
@@ -70,38 +83,99 @@ ARCHITECTURE Behavioral OF pong IS
     COMPONENT leddec16 IS
         PORT (
             dig : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-            data : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+            data : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
             anode : OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
             seg : OUT STD_LOGIC_VECTOR (6 DOWNTO 0)
         );
     END COMPONENT; 
     
 BEGIN
-    pos : PROCESS (clk_in) is
+
+    KB_row <= row_scan;
+    col_scan <= KB_col;
+    score_data <= score1 & score2;
+    
+    -- Keypad scanning process
+    keypad_scan : PROCESS(clk_in)
     BEGIN
-        if rising_edge(clk_in) then
-            count <= count + 1;
-            IF (btnl = '1' and count = 0 and batpos > 70) THEN
-                batpos <= batpos - 10;
-            ELSIF (btnr = '1' and count = 0 and batpos < 550) THEN
-                batpos <= batpos + 10;
-            END IF;
-        end if;
+       IF rising_edge(clk_in) THEN
+          scan_delay <= scan_delay + 1;
+          IF scan_delay > 64 THEN 
+             scan_delay <= 0;
+             scan_state <= (scan_state + 1) MOD 4;
+             
+             CASE scan_state IS
+                WHEN 0 =>
+                   row_scan <= "1110";
+                WHEN 1 =>
+                   row_scan <= "1101";
+                WHEN 2 =>
+                   row_scan <= "1011";
+                WHEN 3 =>
+                   row_scan <= "0111";
+             END CASE;
+          END IF;
+       END IF;
     END PROCESS;
     
-    pos2 : PROCESS (clk_in) is
+    -- Keypad decode process
+    key_decode : PROCESS(row_scan, col_scan)
     BEGIN
-        if rising_edge(clk_in) then
-            count <= count + 1;
-            IF (btnl = '1' and count = 0 and batpos2 > 70) THEN
-                batpos2 <= batpos - 10;
-            ELSIF (btnr = '1' and count = 0 and batpos2 < 550) THEN
-                batpos2 <= batpos2 + 10;
-            END IF;
-        end if;
+       paddle_up <= '0';
+       paddle_down <= '0';
+       
+       IF row_scan = "1110" THEN
+          IF col_scan = "1110" THEN
+             paddle_down <= '1';
+          ELSIF col_scan = "1101" THEN
+             paddle_up <= '1';
+          END IF;
+       END IF;
     END PROCESS;
+    
+    pos : PROCESS (clk_in)
+    BEGIN
+       IF rising_edge(clk_in) THEN
+          count <= count + 1;
+          IF (paddle_up = '1' AND count = 0 AND batpos2 > 70) THEN
+             batpos2 <= batpos2 - 10;
+          ELSIF (paddle_down = '1' AND count = 0 AND batpos2 < 550) THEN
+             batpos2 <= batpos2 + 10;
+          END IF;
+       END IF;
+    END PROCESS;
+    
+    pos2 : PROCESS (clk_in)
+    BEGIN
+       IF rising_edge(clk_in) THEN
+          count <= count + 1;
+          IF (btnl = '1' AND count = 0 AND batpos > 70) THEN
+             batpos <= batpos - 10; 
+          ELSIF (btnr = '1' AND count = 0 AND batpos2 < 550) THEN
+             batpos <= batpos + 10;
+          END IF;
+       END IF;
+    END PROCESS;
+    
+    tally_score : PROCESS (clk_in)
+    BEGIN
+        IF rising_edge(clk_in) THEN
+            -- Detect rising edge for score1_inc
+            IF (S_score1_inc = '1' AND prev_score1_inc = '0') THEN
+                score1 <= score1 + 1;
+            END IF;
+            prev_score1_inc <= S_score1_inc;
+    
+            -- Detect rising edge for score2_inc
+            IF (S_score2_inc = '1' AND prev_score2_inc = '0') THEN
+                score2 <= score2 + 1;
+            END IF;
+            prev_score2_inc <= S_score2_inc;
+        END IF;
+    END PROCESS;
+
     led_mpx <= count(19 DOWNTO 17); -- 7-seg multiplexing clock    
-    
+   
     add_bb : bat_n_ball
     PORT MAP(--instantiate bat and ball component
         v_sync => S_vsync, 
@@ -112,7 +186,9 @@ BEGIN
         serve => btn0, 
         red => S_red, 
         green => S_green, 
-        blue => S_blue
+        blue => S_blue,
+        score1_inc => S_score1_inc,
+        score2_inc => S_score2_inc
        
     );
     
@@ -139,7 +215,7 @@ BEGIN
     );
     led1 : leddec16
     PORT MAP(
-      dig => led_mpx, data => display, 
+      dig => led_mpx, data => score_data, 
       anode => SEG7_anode, seg => SEG7_seg
     );
 END Behavioral;
