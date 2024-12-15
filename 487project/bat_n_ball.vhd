@@ -15,8 +15,8 @@ ENTITY bat_n_ball IS
         red : OUT STD_LOGIC;
         green : OUT STD_LOGIC;
         blue : OUT STD_LOGIC;
-        score1_inc : OUT STD_LOGIC_vector(31 downto 0);
-        score2_inc : OUT STD_LOGIC_vector(31 downto 0)
+        score1_inc : OUT STD_LOGIC_vector(15 downto 0);
+        score2_inc : OUT STD_LOGIC_vector(15 downto 0)
        
      
     );
@@ -40,8 +40,8 @@ ARCHITECTURE Behavioral OF bat_n_ball IS
     Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
     -- current ball motion - initialized to (+ ball_speed) pixels/frame in both X and Y directions
     SIGNAL ball_x_motion, ball_y_motion : STD_LOGIC_VECTOR(10 DOWNTO 0) := ball_speed;
-    signal score1 : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal score2 : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal score1 : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    signal score2 : STD_LOGIC_VECTOR(15 DOWNTO 0);
     
 BEGIN
     red <= NOT (bat_on OR bat_on2); -- color setup for red ball and cyan bat on white background
@@ -158,6 +158,6 @@ BEGIN
         ELSE ball_x <= temp(10 DOWNTO 0);
         END IF;
     END PROCESS;
-    score1_inc <= score1(31 downto 0);
-    score2_inc <= score2(31 downto 0);
+    score1_inc <= score1(15 downto 0);
+    score2_inc <= score2(15 downto 0);
 END Behavioral;
