@@ -12,6 +12,7 @@ ENTITY bat_n_ball IS
         bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0); -- current bat y position
         bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0); -- current bat2 y position
         serve : IN STD_LOGIC; -- initiates serve
+        reset_ball : IN std_logic;
         red : OUT STD_LOGIC;
         green : OUT STD_LOGIC;
         blue : OUT STD_LOGIC;
@@ -101,38 +102,45 @@ BEGIN
            VARIABLE temp : STD_LOGIC_VECTOR (11 DOWNTO 0);
     BEGIN
         WAIT UNTIL rising_edge(v_sync);
-        IF serve = '1' AND game_on = '0' THEN -- test for new serve
+        IF reset_ball = '1' THEN
+            ball_x <= CONV_STD_LOGIC_VECTOR(400, 11);
+            ball_y <= CONV_STD_LOGIC_VECTOR(300, 11);
             game_on <= '1';
-            ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
-        ELSIF ball_y <= bsize THEN -- bounce off top wall
-            ball_y_motion <= ball_speed; -- set vspeed to (+ ball_speed) pixels
-        ELSIF ball_y + bsize >= 600 THEN -- if ball meets bottom wall
-            ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
         
-        END IF;
-        -- allow for bounce off left or right of screen
-        IF ball_x + bsize >= 800 THEN -- bounce off right wall
-            ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
-                game_on <= '0'; -- and make ball disappear
-        ELSIF ball_x <= bsize THEN -- bounce off left wall
-            ball_x_motion <= ball_speed; -- set hspeed to (+ ball_speed) pixels
-                game_on <= '0'; -- and make ball disappear
-        END IF;
-        -- allow for bounce off bat
-        IF (ball_x + bsize/2) >= (bat_x - bat_w) AND
-         (ball_x - bsize/2) <= (bat_x + bat_w) AND
-             (ball_y + bsize/2) >= (bat_y - bat_h) AND
-             (ball_y - bsize/2) <= (bat_y + bat_h) THEN
-                ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels 
-                
-        END IF;
-        
-                IF (ball_x + bsize/2) >= (bat_x2 - bat_w) AND
-         (ball_x - bsize/2) <= (bat_x2 + bat_w) AND
-             (ball_y + bsize/2) >= (bat_y2 - bat_h) AND
-             (ball_y - bsize/2) <= (bat_y2 + bat_h) THEN
-                ball_x_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels 
-                
+        ELSE
+            IF serve = '1' AND game_on = '0' THEN -- test for new serve
+                game_on <= '1';
+                ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
+            ELSIF ball_y <= bsize THEN -- bounce off top wall
+                ball_y_motion <= ball_speed; -- set vspeed to (+ ball_speed) pixels
+            ELSIF ball_y + bsize >= 600 THEN -- if ball meets bottom wall
+                ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
+            
+            END IF;
+            -- allow for bounce off left or right of screen
+            IF ball_x + bsize >= 800 THEN -- bounce off right wall
+                ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
+                    game_on <= '0'; 
+            ELSIF ball_x <= bsize THEN -- bounce off left wall
+                ball_x_motion <= ball_speed; -- set hspeed to (+ ball_speed) pixels
+                    game_on <= '0'; 
+            END IF;
+            -- allow for bounce off bat
+            IF (ball_x + bsize/2) >= (bat_x - bat_w) AND
+             (ball_x - bsize/2) <= (bat_x + bat_w) AND
+                 (ball_y + bsize/2) >= (bat_y - bat_h) AND
+                 (ball_y - bsize/2) <= (bat_y + bat_h) THEN
+                    ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels 
+                    
+            END IF;
+            
+                    IF (ball_x + bsize/2) >= (bat_x2 - bat_w) AND
+             (ball_x - bsize/2) <= (bat_x2 + bat_w) AND
+                 (ball_y + bsize/2) >= (bat_y2 - bat_h) AND
+                 (ball_y - bsize/2) <= (bat_y2 + bat_h) THEN
+                    ball_x_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels 
+                    
+            END IF;
         END IF;
         
         -- Deal with the scoring
@@ -153,8 +161,6 @@ BEGIN
         END IF;
         
         -- compute next ball vertical position
-        -- variable temp adds one more bit to calculation to fix unsigned underflow problems
-        -- when ball_y is close to zero and ball_y_motion is negative
         temp := ('0' & ball_y) + (ball_y_motion(10) & ball_y_motion);
         IF game_on = '0' THEN
             ball_y <= CONV_STD_LOGIC_VECTOR(440, 11);
@@ -163,8 +169,6 @@ BEGIN
         ELSE ball_y <= temp(10 DOWNTO 0); -- 9 downto 0
         END IF;
         -- compute next ball horizontal position
-        -- variable temp adds one more bit to calculation to fix unsigned underflow problems
-        -- when ball_x is close to zero and ball_x_motion is negative
         temp := ('0' & ball_x) + (ball_x_motion(10) & ball_x_motion);
         IF temp(11) = '1' THEN
             ball_x <= (OTHERS => '0');
