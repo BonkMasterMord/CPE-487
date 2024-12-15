@@ -42,6 +42,7 @@ ARCHITECTURE Behavioral OF pong IS
     SIGNAL S_score1_inc, S_score2_inc : std_logic;
     SIGNAL score_data : STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL prev_score1_inc, prev_score2_inc : STD_LOGIC := '0';
+    SIGNAL S_reset_ball : STD_LOGIC := '0';
     COMPONENT bat_n_ball IS
         PORT (
             v_sync : IN STD_LOGIC;
@@ -163,12 +164,18 @@ BEGIN
             -- Detect rising edge for score1_inc
             IF (S_score1_inc = '1' AND prev_score1_inc = '0') THEN
                 score1 <= score1 + 1;
+                S_reset_ball <= '1';
+            ELSE
+                S_reset_ball <= '0';
             END IF;
             prev_score1_inc <= S_score1_inc;
     
             -- Detect rising edge for score2_inc
             IF (S_score2_inc = '1' AND prev_score2_inc = '0') THEN
                 score2 <= score2 + 1;
+                S_reset_ball <= '1';
+            ELSE
+                S_reset_ball <= '0';
             END IF;
             prev_score2_inc <= S_score2_inc;
         END IF;
@@ -183,7 +190,8 @@ BEGIN
         pixel_col => S_pixel_col, 
         bat_y => batpos,
         bat_y2 => batpos2, 
-        serve => btn0, 
+        serve => btn0,
+        reset_ball => S_reset_ball, 
         red => S_red, 
         green => S_green, 
         blue => S_blue,
