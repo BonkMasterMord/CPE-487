@@ -1,4 +1,5 @@
 LIBRARY IEEE;
+LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_ARITH.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -38,11 +39,8 @@ ARCHITECTURE Behavioral OF pong IS
     SIGNAL paddle_up, paddle_down : STD_LOGIC := '0';
     SIGNAL scan_state : INTEGER RANGE 0 TO 3 := 0;
     SIGNAL scan_delay : INTEGER := 0;
-    SIGNAL score1, score2 : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    SIGNAL S_score1_inc, S_score2_inc : std_logic;
-    SIGNAL score_data : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    SIGNAL prev_score1_inc, prev_score2_inc : STD_LOGIC := '0';
-    SIGNAL S_reset_ball : STD_LOGIC := '0';
+    signal scoreT : std_logic_vector(31 downto 0);
+    signal scoreT2 : std_logic_vector(31 downto 0);
     COMPONENT bat_n_ball IS
         PORT (
             v_sync : IN STD_LOGIC;
@@ -54,8 +52,8 @@ ARCHITECTURE Behavioral OF pong IS
             red : OUT STD_LOGIC;
             green : OUT STD_LOGIC;
             blue : OUT STD_LOGIC;
-            score1_inc : OUT STD_LOGIC;
-            score2_inc : OUT STD_LOGIC
+            score1_inc : OUT STD_LOGIC_vector(31 downto 0);
+            score2_inc : OUT STD_LOGIC_vector(31 downto 0)
            
             
         );
@@ -94,7 +92,7 @@ BEGIN
 
     KB_row <= row_scan;
     col_scan <= KB_col;
-    score_data <= score1 & score2;
+    
     
     -- Keypad scanning process
     keypad_scan : PROCESS(clk_in)
@@ -148,40 +146,20 @@ BEGIN
     
     pos2 : PROCESS (clk_in)
     BEGIN
-       IF rising_edge(clk_in) THEN
-          count <= count + 1;
-          IF (btnl = '1' AND count = 0 AND batpos > 70) THEN
-             batpos <= batpos - 10; 
-          ELSIF (btnr = '1' AND count = 0 AND batpos2 < 550) THEN
-             batpos <= batpos + 10;
-          END IF;
-       END IF;
+       if rising_edge(clk_in) then
+            count <= count + 1;
+            IF (btnl = '1' and count = 0 and batpos > 70) THEN
+                batpos <= batpos - 10;
+            ELSIF (btnr = '1' and count = 0 and batpos < 550) THEN
+                batpos <= batpos + 10;
+            END IF;
+        end if;
     END PROCESS;
     
-    tally_score : PROCESS (clk_in)
-    BEGIN
-        IF rising_edge(clk_in) THEN
-            -- Detect rising edge for score1_inc
-            IF (S_score1_inc = '1' AND prev_score1_inc = '0') THEN
-                score1 <= score1 + 1;
-                S_reset_ball <= '1';
-            ELSE
-                S_reset_ball <= '0';
-            END IF;
-            prev_score1_inc <= S_score1_inc;
-    
-            -- Detect rising edge for score2_inc
-            IF (S_score2_inc = '1' AND prev_score2_inc = '0') THEN
-                score2 <= score2 + 1;
-                S_reset_ball <= '1';
-            ELSE
-                S_reset_ball <= '0';
-            END IF;
-            prev_score2_inc <= S_score2_inc;
-        END IF;
-    END PROCESS;
-
+   
     led_mpx <= count(19 DOWNTO 17); -- 7-seg multiplexing clock    
+   
+   
    
     add_bb : bat_n_ball
     PORT MAP(--instantiate bat and ball component
@@ -191,14 +169,13 @@ BEGIN
         bat_y => batpos,
         bat_y2 => batpos2, 
         serve => btn0,
-        reset_ball => S_reset_ball, 
         red => S_red, 
         green => S_green, 
         blue => S_blue,
-        score1_inc => S_score1_inc,
-        score2_inc => S_score2_inc
-       
+        score1_inc => scoreT,
+        score2_inc => scoreT2
     );
+   
     
     vga_driver : vga_sync
     PORT MAP(--instantiate vga_sync component
@@ -223,7 +200,7 @@ BEGIN
     );
     led1 : leddec16
     PORT MAP(
-      dig => led_mpx, data => score_data, 
+      dig => led_mpx, data => scoreT,
       anode => SEG7_anode, seg => SEG7_seg
     );
 END Behavioral;
