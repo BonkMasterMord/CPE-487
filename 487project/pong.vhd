@@ -39,8 +39,9 @@ ARCHITECTURE Behavioral OF pong IS
     SIGNAL paddle_up, paddle_down : STD_LOGIC := '0';
     SIGNAL scan_state : INTEGER RANGE 0 TO 3 := 0;
     SIGNAL scan_delay : INTEGER := 0;
-    signal scoreT : std_logic_vector(31 downto 0);
-    signal scoreT2 : std_logic_vector(31 downto 0);
+    signal scoreT : std_logic_vector(15 downto 0);
+    signal scoreT2 : std_logic_vector(15 downto 0);
+    signal sendT: std_logic_vector(31 downto 0);
     COMPONENT bat_n_ball IS
         PORT (
             v_sync : IN STD_LOGIC;
@@ -52,8 +53,8 @@ ARCHITECTURE Behavioral OF pong IS
             red : OUT STD_LOGIC;
             green : OUT STD_LOGIC;
             blue : OUT STD_LOGIC;
-            score1_inc : OUT STD_LOGIC_vector(31 downto 0);
-            score2_inc : OUT STD_LOGIC_vector(31 downto 0)
+            score1_inc : OUT STD_LOGIC_vector(15 downto 0);
+            score2_inc : OUT STD_LOGIC_vector(15 downto 0)
            
             
         );
@@ -158,7 +159,7 @@ BEGIN
     
    
     led_mpx <= count(19 DOWNTO 17); -- 7-seg multiplexing clock    
-   
+   sendT <= scoreT(15 downto 0) & scoreT2(15 downto 0);
    
    
     add_bb : bat_n_ball
@@ -200,7 +201,7 @@ BEGIN
     );
     led1 : leddec16
     PORT MAP(
-      dig => led_mpx, data => scoreT,
+      dig => led_mpx, data => sendT,
       anode => SEG7_anode, seg => SEG7_seg
     );
 END Behavioral;
