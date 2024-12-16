@@ -93,7 +93,7 @@ BEGIN
 
     KB_row <= row_scan;
     col_scan <= KB_col;
-    
+ 
     
     -- Keypad scanning process
     keypad_scan : PROCESS(clk_in)
@@ -133,25 +133,25 @@ BEGIN
        END IF;
     END PROCESS;
     
-    pos : PROCESS (clk_in)
+    pos2 : PROCESS (clk_in)
     BEGIN
        IF rising_edge(clk_in) THEN
           count <= count + 1;
-          IF (paddle_up = '1' AND count = 0 AND batpos2 > 70) THEN
-             batpos2 <= batpos2 - 10;
-          ELSIF (paddle_down = '1' AND count = 0 AND batpos2 < 550) THEN
-             batpos2 <= batpos2 + 10;
+          IF (paddle_up = '1' AND count = 0 AND batpos2 > 75) THEN
+             batpos2 <= batpos2 - 25;
+          ELSIF (paddle_down = '1' AND count = 0 AND batpos2 < 530) THEN
+             batpos2 <= batpos2 + 25;
           END IF;
        END IF;
     END PROCESS;
     
-    pos2 : PROCESS (clk_in)
+    pos1 : PROCESS (clk_in)
     BEGIN
        if rising_edge(clk_in) then
             count <= count + 1;
-            IF (btnl = '1' and count = 0 and batpos > 70) THEN
+            IF (btnl = '1' and count = 0 and batpos > 75) THEN
                 batpos <= batpos - 10;
-            ELSIF (btnr = '1' and count = 0 and batpos < 550) THEN
+            ELSIF (btnr = '1' and count = 0 and batpos < 530) THEN
                 batpos <= batpos + 10;
             END IF;
         end if;
@@ -159,7 +159,6 @@ BEGIN
     
    
     led_mpx <= count(19 DOWNTO 17); -- 7-seg multiplexing clock    
-   sendT <= scoreT(15 downto 0) & scoreT2(15 downto 0);
    
    
     add_bb : bat_n_ball
@@ -192,6 +191,7 @@ BEGIN
         hsync => VGA_hsync, 
         vsync => S_vsync
     );
+    sendT <= scoreT(15 downto 0) & scoreT2(15 downto 0);
     VGA_vsync <= S_vsync; --connect output vsync
         
     clk_wiz_0_inst : clk_wiz_0
