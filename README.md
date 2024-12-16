@@ -60,8 +60,8 @@ Once the system is powered and programmed onto the Nexys board:
   - `btn0`: Serve button.
   - `btnl`: Move right paddle up.
   - `btnr`: Move right paddle down.
-  - `KB_col`: Keypad column inputs.
-  - `KB_row`: Keypad row outputs (to scan the keypad).
+  - `E`: Keypad Move left paddle up.
+  - `D`: Keypad Move leeft paddle down.
   
 - **Outputs:**
   - `VGA_hsync`, `VGA_vsync`: VGA synchronization signals to drive the monitor.
