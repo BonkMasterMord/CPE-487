@@ -65,3 +65,6 @@ This project implements the classic Pong game on an FPGA with VGA output and an 
 - The vertical position of paddles is bounded so they remain visible on the screen.
 - The seven-segment display shows hexadecimal digits for the score, incrementing from 0 through F as points are scored.
 - Speeds and positions (like how fast paddles move or the ball’s trajectory) can be tuned by adjusting constants in the VHDL code.
+
+A demonstration of the working project can be viewed here:  
+[Video of Project Running](https://drive.google.com/file/d/15aVuuxRJrZlPj3xoUsR3up2gvnvvrSjO/view?usp=drive_link)
