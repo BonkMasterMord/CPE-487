@@ -44,6 +44,7 @@ ARCHITECTURE Behavioral OF bat_n_ball IS
     signal score2 : STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal trigger : std_logic := '0';
     signal trigger2 : std_logic := '0';
+    signal offscreen_trigger : std_logic := '0';
     
 BEGIN
     red <= NOT (bat_on OR bat_on2); -- color setup for red ball and cyan bat on white background
@@ -114,14 +115,30 @@ BEGIN
             ball_y_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels
         
         END IF;
+        
+        -- account for the offscreen trigger
+        if bsize <= ball_x AND 800 >= ball_x + bsize then
+            offscreen_trigger <= '0';
+        end if;
+        
         -- allow for bounce off left or right of screen
         IF ball_x + bsize >= 800 THEN -- bounce off right wall
             ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
-              
+                if offscreen_trigger = '0' then
+                     if game_on = '1' then
+                        score1 <= score1 + 4;
+                    end if;
+                 offscreen_trigger <= '1';
+                end if;
                 game_on <= '0'; -- and make ball disappear
         ELSIF ball_x <= bsize THEN -- bounce off left wall
             ball_x_motion <= ball_speed; -- set hspeed to (+ ball_speed) pixels
-              
+                if offscreen_trigger = '0' then
+                if game_on = '1' then
+                    score2 <= score2 + 4;
+                end if;
+                 offscreen_trigger <= '1';
+                end if;
                 game_on <= '0'; -- and make ball disappear
         END IF;
         -- allow for bounce off bat
