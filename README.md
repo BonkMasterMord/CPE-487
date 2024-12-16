@@ -76,6 +76,8 @@ The `.xdc` file specifies which FPGA pins connect to these ports, ensuring prope
 A demonstration of the working project is available here:  
 [Video of Project Running](https://drive.google.com/file/d/15aVuuxRJrZlPj3xoUsR3up2gvnvvrSjO/view?usp=drive_link)
 
+Note that this video is out of date. It shows a version that calculates the score inocrrectly. The latest version does not have this bug and displays scores correctly.
+
 ## Modifications
 
 This project builds upon fundamental VGA output and input control logic. Notable modifications and expansions include:
