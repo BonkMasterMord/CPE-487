@@ -42,6 +42,8 @@ ARCHITECTURE Behavioral OF bat_n_ball IS
     SIGNAL ball_x_motion, ball_y_motion : STD_LOGIC_VECTOR(10 DOWNTO 0) := ball_speed;
     signal score1 : STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal score2 : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    signal trigger : std_logic := '0';
+    signal trigger2 : std_logic := '0';
     
 BEGIN
     red <= NOT (bat_on OR bat_on2); -- color setup for red ball and cyan bat on white background
@@ -115,6 +117,7 @@ BEGIN
         -- allow for bounce off left or right of screen
         IF ball_x + bsize >= 800 THEN -- bounce off right wall
             ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
+              
                 game_on <= '0'; -- and make ball disappear
         ELSIF ball_x <= bsize THEN -- bounce off left wall
             ball_x_motion <= ball_speed; -- set hspeed to (+ ball_speed) pixels
@@ -127,18 +130,27 @@ BEGIN
              (ball_y + bsize/2) >= (bat_y - bat_h) AND
              (ball_y - bsize/2) <= (bat_y + bat_h) THEN
                 ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels 
+                   trigger <= '1';
+           
+                END IF;
+                IF trigger = '1' then
                        score1 <= score1 + 1;
-                
+                       trigger <= NOT trigger;
         END IF;
+
         
           IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x2 - bat_w) AND
          (ball_x - bsize/2) <= (bat_x2 + bat_w) AND
              (ball_y + bsize/2) >= (bat_y2 - bat_h) AND
              (ball_y - bsize/2) <= (bat_y2 + bat_h) THEN
                 ball_x_motion <= (NOT ball_speed) + 1; -- set vspeed to (- ball_speed) pixels 
-                score2 <= score2 + 1;
-
+                   trigger2 <= '1';
         END IF;
+                IF trigger2 = '1' then
+                       score2 <= score2 + 1;
+                       trigger2 <= NOT trigger2;
+        END IF;
+ 
         -- compute next ball vertical position
         -- variable temp adds one more bit to calculation to fix unsigned underflow problems
         -- when ball_y is close to zero and ball_y_motion is negative
