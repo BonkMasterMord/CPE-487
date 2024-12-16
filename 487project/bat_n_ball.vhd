@@ -122,7 +122,7 @@ BEGIN
                 game_on <= '0'; -- and make ball disappear
         END IF;
         -- allow for bounce off bat
-        IF (ball_x + bsize/2) >= (bat_x - bat_w) AND
+        IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x - bat_w) AND
          (ball_x - bsize/2) <= (bat_x + bat_w) AND
              (ball_y + bsize/2) >= (bat_y - bat_h) AND
              (ball_y - bsize/2) <= (bat_y + bat_h) THEN
@@ -131,7 +131,7 @@ BEGIN
                 
         END IF;
         
-                IF (ball_x + bsize/2) >= (bat_x2 - bat_w) AND
+          IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x2 - bat_w) AND
          (ball_x - bsize/2) <= (bat_x2 + bat_w) AND
              (ball_y + bsize/2) >= (bat_y2 - bat_h) AND
              (ball_y - bsize/2) <= (bat_y2 + bat_h) THEN
