@@ -18,7 +18,7 @@ Once the system is powered and programmed onto the Nexys board:
    - The **Left Paddle** is controlled by a connected keypad.
    - The **Right Paddle** is controlled by on-board buttons (`btnl` to move up, `btnr` to move down).
    
-   When the ball hits a paddle, it bounces back. If it passes off the screen on one side, the opposite player scores a point.
+   When the ball hits a paddle, it bounces back, and the player who hit the ball scores a point.
 
 3. **Scoring System:**  
    Each time a point is scored, that player's score increments on the seven-segment display. Scores are displayed in hexadecimal, going from 0 through F.
