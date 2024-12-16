@@ -35,7 +35,7 @@ This project implements the classic Pong game on an FPGA with VGA output and an 
    The left paddle moves based on keypad input (selected keys cause it to move up or down), and the right paddle is controlled by `btnl` (move up) and `btnr` (move down).
 
 3. **Scoring a Point:**  
-   If the ball passes entirely off one side of the screen, the opposite player scores a point. The respective score increments by one digit (in hex) on the seven-segment display.
+   If you sucessfully hit the ball with the bat you gain a point, The respective score increments by one digit (in hex) on the seven-segment display.
 
 4. **Continuing the Game:**  
    After a point is scored, press `btn0` again to serve the ball and continue the game.
