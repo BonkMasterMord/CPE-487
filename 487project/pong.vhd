@@ -39,8 +39,10 @@ ARCHITECTURE Behavioral OF pong IS
     SIGNAL paddle_up, paddle_down : STD_LOGIC := '0';
     SIGNAL scan_state : INTEGER RANGE 0 TO 3 := 0;
     SIGNAL scan_delay : INTEGER := 0;
-    signal scoreT : std_logic_vector(15 downto 0);
-    signal scoreT2 : std_logic_vector(15 downto 0);
+    signal scoreT : STD_LOGIC_VECTOR(15 downto 0);
+    signal scoreTover2 : STD_LOGIC_VECTOR(15 downto 0);
+    signal scoreT2 : STD_LOGIC_VECTOR(15 downto 0);
+    signal scoreT2over2 : STD_LOGIC_VECTOR(15 downto 0);
     signal sendT: std_logic_vector(31 downto 0);
     COMPONENT bat_n_ball IS
         PORT (
@@ -191,7 +193,10 @@ BEGIN
         hsync => VGA_hsync, 
         vsync => S_vsync
     );
-    sendT <= scoreT(15 downto 0) & scoreT2(15 downto 0);
+    
+    scoreTover2 <= '0' & scoreT(scoreT'high downto 1);
+    scoreT2over2 <= '0' & scoreT2(scoreT'high downto 1);
+    sendT <= scoreTover2(15 downto 0) & scoreT2over2(15 downto 0);
     VGA_vsync <= S_vsync; --connect output vsync
         
     clk_wiz_0_inst : clk_wiz_0
