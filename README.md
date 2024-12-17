@@ -113,7 +113,7 @@ Note that this video is out of date. It shows a version that calculates the scor
 This project builds upon fundamental VGA output and input control logic. Notable modifications and expansions include:
 
 - **Keypad Integration for Paddle Control:**  
-  Instead of using only on-board buttons, the left paddle is controlled by keypad input. This required adding a row-column scanning process, decoding pressed keys, and mapping them to paddle movement.
+  Instead of using only on-board buttons, the left paddle is controlled by keypad input. This required adding a fsm (borrowed from lab 4) with a row-column scanning process, decoding pressed keys, and mapping them to paddle movement.
 ```
   KB_row <= row_scan;
   col_scan <= KB_col;
@@ -162,17 +162,20 @@ This project builds upon fundamental VGA output and input control logic. Notable
    sendT <= scoreTover2(15 downto 0) & scoreT2over2(15 downto 0);
   ```
 
-- **Sending OUT score signals back to the top level (pong.vhd)**
+- **Sending OUT score signals back to the top level (pong.vhd)**  
+- How we sent scores back into pong.vhd (pong.vhd contains score1_inc & score2_inc) which will be fed into data after some refinement with the bits
  ```
     score1_inc <= score1(15 downto 0);
     score2_inc <= score2(15 downto 0);
   ```
-- **Initializing fixed bat positions**
+- **Initializing fixed bat positions**  
+- Keep Bats at a fixed X position
   ```
     CONSTANT bat_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(100, 11);
     Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
   ```
 - **Setting condition to increase score (basically whenever ball hits bat)**
+- A trigger would occur everytime the ball reflects off of a bat (borrowed from Lab 6), causing score to increase.
   ```
               trigger <= '1';
            
@@ -192,7 +195,8 @@ This project builds upon fundamental VGA output and input control logic. Notable
   ```
 
 - **Custom Timing and Movement:**  
-  Adjusted the ball speed, paddle step size, and timing signals for smoother gameplay. 
+  Adjusted the ball speed, paddle step size, and timing signals for smoother gameplay.
+  We adjusted the batwidth and height to fit our pong style profile.
   ```
       CONSTANT bsize : INTEGER := 8; -- ball size in pixels
     signal bat_w : INTEGER := 3; -- bat width in pixels
@@ -208,6 +212,7 @@ This project builds upon fundamental VGA output and input control logic. Notable
     SIGNAL ball_y : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
   ```
 - ** Scoring mechanism for when the ball reaches the left or right of the board**
+- Essesntially we had an offscreen std_logic trigger that would go off everytime the ball reaches the end of the board with the condition that the game is still on  
 ```
  IF ball_x + bsize >= 800 THEN -- bounce off right wall
             ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
