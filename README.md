@@ -5,6 +5,7 @@
 # FPGA Pong Game
 
 This project implements the classic Pong game on a Nexys FPGA board with VGA output. The design is written in VHDL and uses additional hardware (VGA monitor, keypad, on-board buttons) to allow interactive gameplay. The ball and paddles are drawn on a VGA display, and player scores are shown on a seven-segment display. Inputs include a keypad for controlling the left paddle and on-board buttons for controlling the right paddle and serving the ball.
+
 <img src="https://github.com/user-attachments/assets/ad9bee25-ec19-4bba-afaf-58ab16042340" alt="Alt Text" width="300" height="200">
 <img src="https://github.com/user-attachments/assets/b17af6e0-bff2-413d-bbe2-4e515bf572f5" alt="Alt Text" width="300" height="200">
 <img src="https://github.com/user-attachments/assets/874854f8-bf13-4f67-aabb-2b561d80ca17" alt="Alt Text" width="300" height="200">
