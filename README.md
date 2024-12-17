@@ -72,7 +72,25 @@ Once the system is powered and programmed onto the Nexys board:
   - `E`: Keypad Move left paddle up.
   - `D`: Keypad Move leeft paddle down.
 
-https://github.com/BonkMasterMord/CPE-487/blob/be5bcda33a9f7b8135653e0aa43dd4d2d6436906/487project/pong.xdc?plain=1
+```
+# Buttons
+set_property -dict { PACKAGE_PIN N17 IOSTANDARD LVCMOS33 } [get_ports {btn0}]
+set_property -dict { PACKAGE_PIN P17 IOSTANDARD LVCMOS33 } [get_ports {btnl}]
+set_property -dict { PACKAGE_PIN M17 IOSTANDARD LVCMOS33 } [get_ports {btnr}]
+
+# Keypad (4x4) from HexCalc
+# Columns as inputs (KB_col[3:0])
+set_property -dict { PACKAGE_PIN G17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[3]}]
+set_property -dict { PACKAGE_PIN E18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[2]}]
+set_property -dict { PACKAGE_PIN D18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[1]}]
+set_property -dict { PACKAGE_PIN C17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[0]}]
+
+# Rows as outputs (KB_row[3:0])
+set_property -dict { PACKAGE_PIN G18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[3]}]
+set_property -dict { PACKAGE_PIN F18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[2]}]
+set_property -dict { PACKAGE_PIN E17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[1]}]
+set_property -dict { PACKAGE_PIN D17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[0]}]
+```
 
   
 - **Outputs:**
@@ -96,7 +114,7 @@ This project builds upon fundamental VGA output and input control logic. Notable
 
 - **Keypad Integration for Paddle Control:**  
   Instead of using only on-board buttons, the left paddle is controlled by keypad input. This required adding a row-column scanning process, decoding pressed keys, and mapping them to paddle movement.
-
+```
   KB_row <= row_scan;
   col_scan <= KB_col;
     
@@ -137,17 +155,23 @@ This project builds upon fundamental VGA output and input control logic. Notable
           END IF;
        END IF;
     END PROCESS;
+```
 - **Extended Score Display:**  
   Scores are shown on a multi-digit seven-segment display, requiring a custom VHDL decoder that can handle multiple hexadecimal digits simultaneously.
+  ```
    sendT <= scoreTover2(15 downto 0) & scoreT2over2(15 downto 0);
+  ```
 
 - **Sending OUT score signals back to the top level (pong.vhd)**
+ ```
     score1_inc <= score1(15 downto 0);
     score2_inc <= score2(15 downto 0);
-  
+  ```
 - **Initializing fixed bat positions**
+  ```
     CONSTANT bat_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(100, 11);
     Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
+  ```
 
 - **Custom Timing and Movement:**  
   Adjusted the ball speed, paddle step size, and timing signals for smoother gameplay. The `count` signal and various if-conditions ensure that paddle and ball movements occur at a human-playable pace.
@@ -164,18 +188,23 @@ This project builds upon fundamental VGA output and input control logic. Notable
 - DAY 4: The final milestone involved linking all modules together, adjusting parameters for gameplay feel, and confirming the display updated as intended.
 
 **Difficulties and Solutions:**  
-Issue: Bat2 did not show up initially
+Issue: Bat2 did not show up initially   
 Solution: We made an "OR" statement for bat1_on and bat2_on so that Bat will also now show up as cyan.
+```
  red <= NOT (bat_on OR bat_on2); -- color setup for red ball and cyan bat on white background
     green <= NOT ball_on;
     blue <= NOT ball_on;
+```
 
-Issue: Bat1 was unable to bounce the ball back, but Bat2 was able to.
+Issue: Bat1 was unable to bounce the ball back, but Bat2 was able to.  
 Solution: Change NOT ball_speed to just ball_speed because it needs to bounce to the right (positve end) 
- ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels 
+```
+ ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels
+```
 
-Issue: Bats kept dissappearing whenever you move too high or too low.
+Issue: Bats kept dissappearing whenever you move too high or too low.  
 Solution: Restrict how far you can move up and move down through pixel constraints in pong.vhd
+```
      pos1 : PROCESS (clk_in)
     BEGIN
        if rising_edge(clk_in) then
@@ -187,22 +216,27 @@ Solution: Restrict how far you can move up and move down through pixel constrain
             END IF;
         end if;
     END PROCESS;
+```
 
-Issue: Bats were not centered everytime the game started.
+Issue: Bats were not centered everytime the game started.  
 Solution: Initialize the Bat's pixel coordinates in the component bat_n_ball under pong.vhd
+```
             bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0):= CONV_STD_LOGIC_VECTOR(300, 11);
             bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
-
-Issue: Scores kept randomely increasing
-Solution: Add additional conditions when the ball reflects or when the ball enters the other players end
+```
+Issue: Scores kept randomely increasing.  
+Solution: Add additional conditions when the ball reflects or when the ball enters the other players end.
+```
   IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x - bat_w) AND..
   IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x2 - bat_w) AND..
+```
 
-Issue: Scores kept increasing in 2's 
+Issue: Scores kept increasing in 2's.  
 Solution: Shift bits in the top level of pong where they will be sent to data.
+```
     scoreTover2 <= '0' & scoreT(scoreT'high downto 1);
     scoreT2over2 <= '0' & scoreT2(scoreT'high downto 1);
-
+```
 
 **Project Outcome:**  
 The final result is a functioning hardware-accelerated Pong game on an FPGA, complete with VGA output, real-time input from both keypad and buttons, and a live score display. This project demonstrates the integration of multiple FPGA components (I/O, display, timing) to create an interactive pong style gameplay.
