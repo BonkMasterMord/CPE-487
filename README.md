@@ -168,7 +168,8 @@ Notable modifications and expansions include:
   ```
 
 - **Sending OUT score signals back to the top level (pong.vhd)**  
-  How we sent scores back into pong.vhd (pong.vhd contains score1_inc & score2_inc) which will be fed into data after some refinement with the bits
+  How we sent scores back into pong.vhd (pong.vhd contains score1_inc & score2_inc) which will be fed into data after some refinement with the bits.  
+  Data will be sent to leddec16 where the scores will be displayed on the 7 segemented screen.
  ```
     score1_inc <= score1(15 downto 0);
     score2_inc <= score2(15 downto 0);
