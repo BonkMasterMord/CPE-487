@@ -21,7 +21,7 @@ Once the system is powered and programmed onto the Nexys board:
    
 3. **Serving and Gameplay:**  
    Pressing the serve button (`btn0`) launches the ball from the center of the screen. The ball moves toward one paddle. Players must move their paddles to intercept the ball before it reaches the ends of their screen:
-   - The **Left Paddle** is controlled by a connected keypad.
+   - The **Left Paddle** is controlled by a connected keypad (`E` to move up, `D` to move down).
    - The **Right Paddle** is controlled by on-board buttons (`btnl` to move up, `btnr` to move down).
    
    When the ball hits a paddle, it bounces back, and the player who hit the ball scores a point.
@@ -62,7 +62,7 @@ Once the system is powered and programmed onto the Nexys board:
    - Once programmed, you should see the paddles and a blank field.
    - Press `btn0` to serve and start the game.
 
-## Description of Inputs and Outputs to the Nexys Board
+## Description of Inputs and Outputs of button controls to the Nexys Board with constraint file
 
 - **Inputs:**
   - `clk_in`: Main system clock input from the Nexys board’s oscillator.
@@ -172,9 +172,41 @@ This project builds upon fundamental VGA output and input control logic. Notable
     CONSTANT bat_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(100, 11);
     Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
   ```
+- **Setting condition to increase score (basically whenever ball hits bat)**
+  ```
+              trigger <= '1';
+           
+                END IF;
+                IF trigger = '1' then
+                       score1 <= score1 + 1;
+                       trigger <= NOT trigger;
+        END IF;
+
+                     trigger2 <= '1';
+        END IF;
+                IF trigger2 = '1' then
+                       score2 <= score2 + 1;
+                       trigger2 <= NOT trigger2;
+        END IF;
+
+  ```
 
 - **Custom Timing and Movement:**  
-  Adjusted the ball speed, paddle step size, and timing signals for smoother gameplay. The `count` signal and various if-conditions ensure that paddle and ball movements occur at a human-playable pace.
+  Adjusted the ball speed, paddle step size, and timing signals for smoother gameplay. 
+  ```
+      CONSTANT bsize : INTEGER := 8; -- ball size in pixels
+    signal bat_w : INTEGER := 3; -- bat width in pixels
+    constant bat_h : INTEGER := 60; -- bat height in pixels
+    -- distance ball moves each frame
+    signal ball_speed : STD_LOGIC_VECTOR (10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(6, 11);
+    SIGNAL ball_on : STD_LOGIC; -- indicates whether ball is at current pixel position
+    SIGNAL bat_on : STD_LOGIC; -- indicates whether bat at over current pixel position
+    SIGNAl bat_on2 : STD_LOGIC;
+    SIGNAL game_on : STD_LOGIC := '0'; -- indicates whether ball is in playby
+    -- current ball position - intitialized to center of screen
+    SIGNAL ball_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(400, 11);
+    SIGNAL ball_y : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
+  ```
 
 ## Conclusion and Summary of the Project
 
