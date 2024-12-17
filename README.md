@@ -300,5 +300,10 @@ Solution: Shift bits in the top level of pong where they will be sent to data.
 ```
 
 **Project Outcome:**  
-The final result is a functioning hardware-accelerated Pong game on an FPGA, complete with VGA output, real-time input from both keypad and buttons, and a live score display. This project demonstrates the integration of multiple FPGA components (I/O, display, timing) to create an interactive pong style gameplay.
+The final result is a functioning hardware-accelerated Pong game on an FPGA, complete with VGA output, real-time input from both keypad and buttons, and a live score display. This project demonstrates the integration of multiple FPGA components (I/O, display, timing) to create an interactive pong style gameplay. 
+
+**Things we could improve or would like to do if given more time**
+- Center the ball a bit better so it will fly in a more uniform way.
+- Create switches that can change the color of the bats or background, allowing for customization.
+- Allow for multiple balls to be served at the same time by adding button input from the HexCalc (more fun game).
 
