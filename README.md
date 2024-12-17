@@ -241,7 +241,7 @@ This project builds upon fundamental VGA output and input control logic. Notable
 
 **Contributors and Responsibilities:**  
 - Anthony: Responsible for coding bat1's movement, game physics, score count, data inputs, and debuging
-- Phineas: Responsible for coding bat2's movement, score accuarcy, score display, data outputs, and debuging
+- Phineas: Responsible for coding bat2's movement, score accuarcy, score display, data outputs, and debuging  
 **Timeline and Challenges:**  
 - DAY 1: Initial setup and VGA output were completed early on, generated the platform with the two bats that will be displayed.  
 - DAY 2: Integrating the keypad control and ensuring stable paddle movement took additional time due to timing and scanning complexity, along side scoring mechanism.  
