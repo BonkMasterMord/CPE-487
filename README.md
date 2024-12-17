@@ -207,7 +207,27 @@ This project builds upon fundamental VGA output and input control logic. Notable
     SIGNAL ball_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(400, 11);
     SIGNAL ball_y : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
   ```
-
+- ** Scoring mechanism for when the ball reaches the left or right of the board**
+```
+ IF ball_x + bsize >= 800 THEN -- bounce off right wall
+            ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
+                if offscreen_trigger = '0' then
+                     if game_on = '1' then
+                        score1 <= score1 + 4;
+                    end if;
+                 offscreen_trigger <= '1';
+                end if;
+                game_on <= '0'; -- and make ball disappear
+        ELSIF ball_x <= bsize THEN -- bounce off left wall
+            ball_x_motion <= ball_speed; -- set hspeed to (+ ball_speed) pixels
+                if offscreen_trigger = '0' then
+                if game_on = '1' then
+                    score2 <= score2 + 4;
+                end if;
+                 offscreen_trigger <= '1';
+                end if;
+                game_on <= '0'; -- and make ball disappear
+```
 ## Conclusion and Summary of the Project
 
 **Contributors and Responsibilities:**  
