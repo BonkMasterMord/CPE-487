@@ -72,8 +72,7 @@ Once the system is powered and programmed onto the Nexys board:
   - `E`: Keypad Move left paddle up.
   - `D`: Keypad Move leeft paddle down.
 
-https://github.com/BonkMasterMord/CPE-487/blob/9d8617952342c8803e91ec87586c62196ae68767/487project/pong.xdc
-https://github.com/BonkMasterMord/CPE-487/blob/be5bcda33a9f7b8135653e0aa43dd4d2d6436906/487project/pong.xdc
+https://github.com/BonkMasterMord/CPE-487/blob/be5bcda33a9f7b8135653e0aa43dd4d2d6436906/487project/pong.xdc?plain=1
 
   
 - **Outputs:**
