@@ -34,6 +34,9 @@ Once the system is powered and programmed onto the Nexys board:
 6. **Continuing the Game:**  
    After a point is scored, press the serve button (`btn0`) again to re-launch the ball. The game can continue indefinitely, or players can decide to reset scores via a designated keypad key (if integrated).
 
+ <img src="https://github.com/user-attachments/assets/67759aa8-23ae-4f43-96a5-3fdd8dc3806d" alt="Alt Text" width="500" height="400">
+
+
 ## Steps to Get the Project Working in Vivado and on the Nexys Board
 
 1. **Open Vivado and Create a New Project:**  
@@ -163,19 +166,19 @@ This project builds upon fundamental VGA output and input control logic. Notable
   ```
 
 - **Sending OUT score signals back to the top level (pong.vhd)**  
-- How we sent scores back into pong.vhd (pong.vhd contains score1_inc & score2_inc) which will be fed into data after some refinement with the bits
+  How we sent scores back into pong.vhd (pong.vhd contains score1_inc & score2_inc) which will be fed into data after some refinement with the bits
  ```
     score1_inc <= score1(15 downto 0);
     score2_inc <= score2(15 downto 0);
   ```
 - **Initializing fixed bat positions**  
-- Keep Bats at a fixed X position
+  Keep Bats at a fixed X position
   ```
     CONSTANT bat_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(100, 11);
     Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
   ```
 - **Setting condition to increase score (basically whenever ball hits bat)**
-- A trigger would occur everytime the ball reflects off of a bat (borrowed from Lab 6), causing score to increase.
+  A trigger would occur everytime the ball reflects off of a bat (borrowed from Lab 6), causing score to increase.
   ```
               trigger <= '1';
            
@@ -212,7 +215,7 @@ This project builds upon fundamental VGA output and input control logic. Notable
     SIGNAL ball_y : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
   ```
 - ** Scoring mechanism for when the ball reaches the left or right of the board**
-- Essesntially we had an offscreen std_logic trigger that would go off everytime the ball reaches the end of the board with the condition that the game is still on  
+  Essesntially we had an offscreen std_logic trigger that would go off everytime the ball reaches the end of the board with the condition that the game is still on  
 ```
  IF ball_x + bsize >= 800 THEN -- bounce off right wall
             ball_x_motion <= (NOT ball_speed) + 1; -- set hspeed to (- ball_speed) pixels
