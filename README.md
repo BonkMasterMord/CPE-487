@@ -72,20 +72,9 @@ Once the system is powered and programmed onto the Nexys board:
   - `E`: Keypad Move left paddle up.
   - `D`: Keypad Move leeft paddle down.
 
+https://github.com/BonkMasterMord/CPE-487/blob/9d8617952342c8803e91ec87586c62196ae68767/487project/pong.xdc
+https://github.com/BonkMasterMord/CPE-487/blob/be5bcda33a9f7b8135653e0aa43dd4d2d6436906/487project/pong.xdc
 
-set_property -dict { PACKAGE_PIN N17 IOSTANDARD LVCMOS33 } [get_ports {btn0}]
-set_property -dict { PACKAGE_PIN P17 IOSTANDARD LVCMOS33 } [get_ports {btnl}]
-set_property -dict { PACKAGE_PIN M17 IOSTANDARD LVCMOS33 } [get_ports {btnr}]
-
-set_property -dict { PACKAGE_PIN G17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[3]}]
-set_property -dict { PACKAGE_PIN E18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[2]}]
-set_property -dict { PACKAGE_PIN D18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[1]}]
-set_property -dict { PACKAGE_PIN C17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[0]}]
-
-set_property -dict { PACKAGE_PIN G18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[3]}]
-set_property -dict { PACKAGE_PIN F18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[2]}]
-set_property -dict { PACKAGE_PIN E17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[1]}]
-set_property -dict { PACKAGE_PIN D17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[0]}]
   
 - **Outputs:**
   - `VGA_hsync`, `VGA_vsync`: VGA synchronization signals to drive the monitor.
