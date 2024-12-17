@@ -114,7 +114,7 @@ The latest version does not have this bug and displays scores correctly.
 
 ## Modifications
 
-This project builds upon fundamental VGA output and input control logic (vga_sync and clk files remained unchanged when borrowed from lab 6).  
+This project builds upon fundamental VGA output and input control logic (vga_sync and clk files remained unchanged when borrowed from lab6)  
 Notable modifications and expansions include:
 
 - **Keypad Integration for Paddle Control:**  
