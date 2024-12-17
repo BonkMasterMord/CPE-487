@@ -239,6 +239,23 @@ Notable modifications and expansions include:
                 end if;
                 game_on <= '0'; -- and make ball disappear
 ```
+- **Displaying scores on 7 segemented screen on Nexys board**  
+Takes data (storing the score) from the top level (pong.vhd) and turnimg those bits into a Hex display
+
+```
+ARCHITECTURE Behavioral OF leddec16 IS
+	SIGNAL data4 : STD_LOGIC_VECTOR (3 DOWNTO 0); -- binary value of current digit
+BEGIN
+	-- Select digit data to be displayed in this mpx period
+	data4 <= data(3 DOWNTO 0)       WHEN dig = "000" ELSE
+         data(7 DOWNTO 4)       WHEN dig = "001" ELSE
+         data(11 DOWNTO 8)      WHEN dig = "010" ELSE
+         data(15 DOWNTO 12)     WHEN dig = "011" ELSE
+         data(19 DOWNTO 16)     WHEN dig = "100" ELSE
+         data(23 DOWNTO 20)     WHEN dig = "101" ELSE
+         data(27 DOWNTO 24)     WHEN dig = "110" ELSE
+         data(31 DOWNTO 28);
+```
 ## Conclusion and Summary of the Project
 
 **Contributors and Responsibilities:**  
