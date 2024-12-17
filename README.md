@@ -71,19 +71,20 @@ Once the system is powered and programmed onto the Nexys board:
   - `btnr`: Move right paddle down.
   - `E`: Keypad Move left paddle up.
   - `D`: Keypad Move leeft paddle down.
- # Buttons on Nexys Board
+
+**Buttons on Nexys Board**
 set_property -dict { PACKAGE_PIN N17 IOSTANDARD LVCMOS33 } [get_ports {btn0}]
 set_property -dict { PACKAGE_PIN P17 IOSTANDARD LVCMOS33 } [get_ports {btnl}]
 set_property -dict { PACKAGE_PIN M17 IOSTANDARD LVCMOS33 } [get_ports {btnr}]
 
-# Keypad (4x4) from HexCalc
-# Columns as inputs (KB_col[3:0])
+**Keypad (4x4) from HexCalc**
+**Columns as inputs (KB_col[3:0])**
 set_property -dict { PACKAGE_PIN G17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[3]}]
 set_property -dict { PACKAGE_PIN E18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[2]}]
 set_property -dict { PACKAGE_PIN D18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[1]}]
 set_property -dict { PACKAGE_PIN C17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[0]}]
 
-# Rows as outputs (KB_row[3:0])
+**Rows as outputs (KB_row[3:0])**
 set_property -dict { PACKAGE_PIN G18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[3]}]
 set_property -dict { PACKAGE_PIN F18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[2]}]
 set_property -dict { PACKAGE_PIN E17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[1]}]
