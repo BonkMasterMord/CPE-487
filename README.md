@@ -17,18 +17,21 @@ Once the system is powered and programmed onto the Nexys board:
 
 1. **Initial State:**  
    The display shows a blank field (the VGA screen with a background), the paddles at default positions, and the score (initially zero) on the seven-segment display.
+   Implementing two inputs from seperate devices, elminating the need to fight over the buttons on the Nexys board that are already crammed.
    
-2. **Serving and Gameplay:**  
-   Pressing the serve button (`btn0`) launches the ball from the center of the screen. The ball moves toward one paddle. Players must move their paddles to intercept the ball:
+3. **Serving and Gameplay:**  
+   Pressing the serve button (`btn0`) launches the ball from the center of the screen. The ball moves toward one paddle. Players must move their paddles to intercept the ball before it reaches the ends of their screen:
    - The **Left Paddle** is controlled by a connected keypad.
    - The **Right Paddle** is controlled by on-board buttons (`btnl` to move up, `btnr` to move down).
    
    When the ball hits a paddle, it bounces back, and the player who hit the ball scores a point.
 
-3. **Scoring System:**  
-   Each time a point is scored, that player's score increments on the seven-segment display. Scores are displayed in hexadecimal, going from 0 through F.
+4. **Scoring System:**  
+   Each time a player reflects the ball 1 point is scored, everytime a player hits the ball to the other end of the board will score 2 points. 
+   Player's score increments on the seven-segment display.
+   Scores are displayed in hexadecimal, going from 0 through F.
 
-4. **Continuing the Game:**  
+6. **Continuing the Game:**  
    After a point is scored, press the serve button (`btn0`) again to re-launch the ball. The game can continue indefinitely, or players can decide to reset scores via a designated keypad key (if integrated).
 
 ## Steps to Get the Project Working in Vivado and on the Nexys Board
@@ -39,7 +42,8 @@ Once the system is powered and programmed onto the Nexys board:
 
 2. **Add Source Files and Constraints:**  
    - Include `pong.vhd` (top-level), `bat_n_ball.vhd`, `vga_sync.vhd`, `clk_wiz_0.vhd`, `leddec16.vhd`, and the keypad scanning logic if separate.
-   - Add the provided `.xdc` constraint file that assigns pins for VGA signals, buttons, and keypad lines.
+   - Add the provided `pong.xdc` constraint file that assigns pins for VGA signals, buttons, and keypad lines.
+  
 
 3. **Synthesize, Implement, and Generate Bitstream:**  
    - Run Synthesis and Implementation in Vivado.
@@ -67,6 +71,23 @@ Once the system is powered and programmed onto the Nexys board:
   - `btnr`: Move right paddle down.
   - `E`: Keypad Move left paddle up.
   - `D`: Keypad Move leeft paddle down.
+ # Buttons on Nexys Board
+set_property -dict { PACKAGE_PIN N17 IOSTANDARD LVCMOS33 } [get_ports {btn0}]
+set_property -dict { PACKAGE_PIN P17 IOSTANDARD LVCMOS33 } [get_ports {btnl}]
+set_property -dict { PACKAGE_PIN M17 IOSTANDARD LVCMOS33 } [get_ports {btnr}]
+
+# Keypad (4x4) from HexCalc
+# Columns as inputs (KB_col[3:0])
+set_property -dict { PACKAGE_PIN G17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[3]}]
+set_property -dict { PACKAGE_PIN E18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[2]}]
+set_property -dict { PACKAGE_PIN D18 IOSTANDARD LVCMOS33 } [get_ports {KB_col[1]}]
+set_property -dict { PACKAGE_PIN C17 IOSTANDARD LVCMOS33 } [get_ports {KB_col[0]}]
+
+# Rows as outputs (KB_row[3:0])
+set_property -dict { PACKAGE_PIN G18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[3]}]
+set_property -dict { PACKAGE_PIN F18 IOSTANDARD LVCMOS33 } [get_ports {KB_row[2]}]
+set_property -dict { PACKAGE_PIN E17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[1]}]
+set_property -dict { PACKAGE_PIN D17 IOSTANDARD LVCMOS33 } [get_ports {KB_row[0]}]
   
 - **Outputs:**
   - `VGA_hsync`, `VGA_vsync`: VGA synchronization signals to drive the monitor.
@@ -90,8 +111,57 @@ This project builds upon fundamental VGA output and input control logic. Notable
 - **Keypad Integration for Paddle Control:**  
   Instead of using only on-board buttons, the left paddle is controlled by keypad input. This required adding a row-column scanning process, decoding pressed keys, and mapping them to paddle movement.
 
+  KB_row <= row_scan;
+  col_scan <= KB_col;
+    
+    -- Keypad scanning process
+    keypad_scan : PROCESS(clk_in)
+    BEGIN
+       IF rising_edge(clk_in) THEN
+          scan_delay <= scan_delay + 1;
+          IF scan_delay > 64 THEN 
+             scan_delay <= 0;
+             scan_state <= (scan_state + 1) MOD 4;
+             
+             CASE scan_state IS
+                WHEN 0 =>
+                   row_scan <= "1110";
+                WHEN 1 =>
+                   row_scan <= "1101";
+                WHEN 2 =>
+                   row_scan <= "1011";
+                WHEN 3 =>
+                   row_scan <= "0111";
+             END CASE;
+          END IF;
+       END IF;
+    END PROCESS;
+    
+    -- Keypad decode process
+    key_decode : PROCESS(row_scan, col_scan)
+    BEGIN
+       paddle_up <= '0';
+       paddle_down <= '0';
+       
+       IF row_scan = "1110" THEN
+          IF col_scan = "1110" THEN
+             paddle_down <= '1';
+          ELSIF col_scan = "1101" THEN
+             paddle_up <= '1';
+          END IF;
+       END IF;
+    END PROCESS;
 - **Extended Score Display:**  
   Scores are shown on a multi-digit seven-segment display, requiring a custom VHDL decoder that can handle multiple hexadecimal digits simultaneously.
+   sendT <= scoreTover2(15 downto 0) & scoreT2over2(15 downto 0);
+
+- **Sending OUT score signals back to the top level (pong.vhd)**
+    score1_inc <= score1(15 downto 0);
+    score2_inc <= score2(15 downto 0);
+  
+- **Initializing fixed bat positions**
+    CONSTANT bat_x : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(100, 11);
+    Constant bat_x2 : STD_LOGIC_VECTOR(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(700, 11);
 
 - **Custom Timing and Movement:**  
   Adjusted the ball speed, paddle step size, and timing signals for smoother gameplay. The `count` signal and various if-conditions ensure that paddle and ball movements occur at a human-playable pace.
@@ -99,18 +169,55 @@ This project builds upon fundamental VGA output and input control logic. Notable
 ## Conclusion and Summary of the Project
 
 **Contributors and Responsibilities:**  
-- All team members collectively contributed to coding the VHDL logic, integrating the VGA and keypad interface, and refining the scoring system. Each member assisted in synthesis, debugging, and testing on the Nexys board.
-
+- Anthony: Responsible for coding bat1's movement, game physics, score count, data inputs, and debuging
+- Phineas: Responsible for coding bat2's movement, score accuarcy, score display, data outputs, and debuging
 **Timeline and Challenges:**  
-- Initial setup and VGA output were completed early on.  
-- Integrating the keypad control and ensuring stable paddle movement took additional time due to timing and scanning complexity.  
-- Implementing scoring and verifying that increments occurred correctly when the ball went off-screen involved careful debugging.  
-- The final milestone involved linking all modules together, adjusting parameters for gameplay feel, and confirming the display updated as intended.
+- DAY 1: Initial setup and VGA output were completed early on, generated the platform with the two bats that will be displayed.  
+- DAY 2: Integrating the keypad control and ensuring stable paddle movement took additional time due to timing and scanning complexity, along side scoring mechanism.  
+- DAY 3: Figuring out why the score kept increasing by 2's everytime we bounced the ball, instead of by 1's like we intended. We also debugged any additional kinks in the code.
+- DAY 4: The final milestone involved linking all modules together, adjusting parameters for gameplay feel, and confirming the display updated as intended.
 
 **Difficulties and Solutions:**  
-- Achieving stable keypad input required experimenting with scan delays and debouncing logic.  
-- Ensuring the ball’s logic and scoring signals were synced with the VGA refresh pulses required careful review of processes and rising edge conditions.
+Issue: Bat2 did not show up initially
+Solution: We made an "OR" statement for bat1_on and bat2_on so that Bat will also now show up as cyan.
+ red <= NOT (bat_on OR bat_on2); -- color setup for red ball and cyan bat on white background
+    green <= NOT ball_on;
+    blue <= NOT ball_on;
+
+Issue: Bat1 was unable to bounce the ball back, but Bat2 was able to.
+Solution: Change NOT ball_speed to just ball_speed because it needs to bounce to the right (positve end) 
+ ball_x_motion <= ball_speed + 1; -- set vspeed to (ball_speed) pixels 
+
+Issue: Bats kept dissappearing whenever you move too high or too low.
+Solution: Restrict how far you can move up and move down through pixel constraints in pong.vhd
+     pos1 : PROCESS (clk_in)
+    BEGIN
+       if rising_edge(clk_in) then
+            count <= count + 1;
+            IF (btnl = '1' and count = 0 and batpos > **75**) THEN
+                batpos <= batpos - 10;
+            ELSIF (btnr = '1' and count = 0 and batpos < **530**) THEN
+                batpos <= batpos + 10;
+            END IF;
+        end if;
+    END PROCESS;
+
+Issue: Bats were not centered everytime the game started.
+Solution: Initialize the Bat's pixel coordinates in the component bat_n_ball under pong.vhd
+            bat_y : IN STD_LOGIC_VECTOR (10 DOWNTO 0):= CONV_STD_LOGIC_VECTOR(300, 11);
+            bat_y2 : IN STD_LOGIC_VECTOR (10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(300, 11);
+
+Issue: Scores kept randomely increasing
+Solution: Add additional conditions when the ball reflects or when the ball enters the other players end
+  IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x - bat_w) AND..
+  IF game_on = '1' AND (ball_x + bsize/2) >= (bat_x2 - bat_w) AND..
+
+Issue: Scores kept increasing in 2's 
+Solution: Shift bits in the top level of pong where they will be sent to data.
+    scoreTover2 <= '0' & scoreT(scoreT'high downto 1);
+    scoreT2over2 <= '0' & scoreT2(scoreT'high downto 1);
+
 
 **Project Outcome:**  
-The final result is a functioning hardware-accelerated Pong game on an FPGA, complete with VGA output, real-time input from both keypad and buttons, and a live score display. This project demonstrates the integration of multiple FPGA components (I/O, display, timing) to create an interactive and visually engaging system.
+The final result is a functioning hardware-accelerated Pong game on an FPGA, complete with VGA output, real-time input from both keypad and buttons, and a live score display. This project demonstrates the integration of multiple FPGA components (I/O, display, timing) to create an interactive pong style gameplay.
 
